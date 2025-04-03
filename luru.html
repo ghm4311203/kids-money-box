@@ -1,0 +1,693 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>记账</title>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto+Mono:wght@500&family=Noto+Sans+SC:wght@400;500;600&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        body {
+            font-family: 'Noto Sans SC', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            background-color: #f5f5f7;
+            max-width: 500px;
+            margin: 0 auto;
+            padding: 20px;
+            padding-top: env(safe-area-inset-top);
+            padding-bottom: env(safe-area-inset-bottom);
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 20px;
+            position: relative;
+        }
+
+        .header h1 {
+            font-size: 24px;
+            color: #1d1d1f;
+            margin-bottom: 10px;
+            padding: 0 30px;
+        }
+
+        .title-edit {
+            position: absolute;
+            right: 0;
+            top: 50%;
+            transform: translateY(-50%);
+            background: none;
+            border: none;
+            color: #0071e3;
+            font-size: 16px;
+            cursor: pointer;
+            padding: 5px;
+            width: 32px;
+            height: 32px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 50%;
+        }
+
+        .title-edit:active {
+            background-color: #f2f2f7;
+        }
+
+        .title-input {
+            display: none;
+            width: 100%;
+            padding: 8px;
+            font-size: 24px;
+            border: 1px solid #d2d2d7;
+            border-radius: 8px;
+            text-align: center;
+            font-weight: 600;
+            background-color: white;
+            margin-bottom: 10px;
+        }
+
+        .tab-container {
+            display: flex;
+            justify-content: center;
+            margin-bottom: 20px;
+            background-color: white;
+            padding: 8px;
+            border-radius: 12px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+            gap: 8px;
+        }
+
+        .tab {
+            flex: 1;
+            padding: 12px;
+            font-size: 16px;
+            border: none;
+            border-radius: 8px;
+            background-color: transparent;
+            color: #1d1d1f;
+            cursor: pointer;
+            transition: all 0.3s;
+            font-weight: 500;
+        }
+
+        .tab.active {
+            background-color: #0071e3;
+            color: white;
+        }
+
+        .content-section {
+            display: none;
+        }
+
+        .content-section.active {
+            display: block;
+        }
+
+        .config-section {
+            background: white;
+            border-radius: 16px;
+            padding: 20px;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+        }
+
+        .config-item {
+            margin: 15px 0;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .config-item label {
+            font-size: 15px;
+            color: #1d1d1f;
+            flex: 1;
+        }
+
+        .config-item input {
+            width: 120px;
+            padding: 10px;
+            border: 1px solid #d2d2d7;
+            border-radius: 8px;
+            font-size: 16px;
+            text-align: right;
+            background-color: #f5f5f7;
+        }
+
+        .save-btn {
+            background-color: #0071e3;
+            color: white;
+            border: none;
+            padding: 12px;
+            border-radius: 8px;
+            width: 100%;
+            font-size: 16px;
+            font-weight: 500;
+            margin-top: 20px;
+            cursor: pointer;
+        }
+
+        .save-btn:active {
+            background-color: #0062c4;
+        }
+
+        .input-section {
+            background: white;
+            border-radius: 16px;
+            padding: 20px;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+        }
+
+        .input-group {
+            margin-bottom: 15px;
+        }
+
+        .input-group label {
+            display: block;
+            margin-bottom: 8px;
+            color: #1d1d1f;
+            font-size: 15px;
+        }
+
+        .input-group input {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid #d2d2d7;
+            border-radius: 8px;
+            font-size: 16px;
+            outline: none;
+            transition: border-color 0.2s;
+        }
+
+        .input-group input:focus {
+            border-color: #0071e3;
+        }
+
+        .button-group {
+            display: flex;
+            gap: 10px;
+        }
+
+        button {
+            flex: 1;
+            padding: 12px;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: background-color 0.2s;
+        }
+
+        .deposit {
+            background-color: #34c759;
+            color: white;
+        }
+
+        .withdraw {
+            background-color: #ff3b30;
+            color: white;
+        }
+
+        .deposit:active {
+            background-color: #2fb350;
+        }
+
+        .withdraw:active {
+            background-color: #e6352b;
+        }
+
+        .summary-section {
+            background: white;
+            border-radius: 16px;
+            padding: 20px;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+        }
+
+        .summary-title {
+            font-size: 18px;
+            color: #1d1d1f;
+            margin-bottom: 15px;
+            font-weight: 600;
+        }
+
+        .summary-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 15px;
+        }
+
+        .summary-item {
+            background: #f5f5f7;
+            padding: 15px;
+            border-radius: 12px;
+        }
+
+        .summary-item-label {
+            font-size: 14px;
+            color: #86868b;
+            margin-bottom: 5px;
+        }
+
+        .summary-item-value {
+            font-size: 20px;
+            color: #1d1d1f;
+            font-family: 'Roboto Mono', monospace;
+        }
+
+        .positive {
+            color: #34c759;
+        }
+
+        .negative {
+            color: #ff3b30;
+        }
+
+        .records-section {
+            background: white;
+            border-radius: 16px;
+            padding: 20px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+        }
+
+        .records-title {
+            font-size: 18px;
+            color: #1d1d1f;
+            margin-bottom: 15px;
+            font-weight: 600;
+        }
+
+        .record-list {
+            max-height: 400px;
+            overflow-y: auto;
+        }
+
+        .record-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 12px 0;
+            border-bottom: 1px solid #f2f2f7;
+        }
+
+        .record-item:last-child {
+            border-bottom: none;
+        }
+
+        .record-info {
+            flex: 1;
+        }
+
+        .record-time {
+            font-size: 12px;
+            color: #86868b;
+            margin-bottom: 4px;
+        }
+
+        .record-remark {
+            font-size: 15px;
+            color: #1d1d1f;
+        }
+
+        .record-amount {
+            font-family: 'Roboto Mono', monospace;
+            font-size: 16px;
+            font-weight: 500;
+        }
+
+        @media (max-width: 375px) {
+            body {
+                padding: 15px;
+            }
+
+            .summary-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1 id="title">孩子小金库</h1>
+        <button class="title-edit" onclick="editTitle()">✏️</button>
+        <input type="text" id="titleInput" class="title-input" maxlength="20">
+    </div>
+
+    <div class="tab-container">
+        <button class="tab active" onclick="switchTab('record')">记账</button>
+        <button class="tab" onclick="switchTab('config')">设置</button>
+    </div>
+
+    <div id="recordSection" class="content-section active">
+        <div class="input-section">
+            <div class="input-group">
+                <label>金额</label>
+                <input type="number" id="amount" step="0.1" placeholder="请输入金额">
+            </div>
+            <div class="input-group">
+                <label>备注</label>
+                <input type="text" id="remark" placeholder="请输入备注">
+            </div>
+            <div class="button-group">
+                <button class="deposit" onclick="addRecord('deposit')">存入</button>
+                <button class="withdraw" onclick="addRecord('withdraw')">支出</button>
+            </div>
+        </div>
+
+        <div class="summary-section">
+            <div class="summary-title">统计摘要</div>
+            <div class="summary-grid">
+                <div class="summary-item">
+                    <div class="summary-item-label">本周收支</div>
+                    <div class="summary-item-value" id="weekSummary">¥0.0</div>
+                </div>
+                <div class="summary-item">
+                    <div class="summary-item-label">本月收支</div>
+                    <div class="summary-item-value" id="monthSummary">¥0.0</div>
+                </div>
+                <div class="summary-item">
+                    <div class="summary-item-label">本年收支</div>
+                    <div class="summary-item-value" id="yearSummary">¥0.0</div>
+                </div>
+                <div class="summary-item">
+                    <div class="summary-item-label">总余额</div>
+                    <div class="summary-item-value" id="totalBalance">¥0.0</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="records-section">
+            <div class="records-title">交易记录</div>
+            <div class="record-list" id="recordList"></div>
+        </div>
+    </div>
+
+    <div id="configSection" class="content-section">
+        <div class="config-section">
+            <div class="config-item">
+                <label>每年增加</label>
+                <input type="number" id="yearlyAmount" min="0" step="0.1" placeholder="0.0">
+            </div>
+            <div class="config-item">
+                <label>每月增加</label>
+                <input type="number" id="monthlyAmount" min="0" step="0.1" placeholder="0.0">
+            </div>
+            <div class="config-item">
+                <label>每周增加</label>
+                <input type="number" id="weeklyAmount" min="0" step="0.1" placeholder="0.0">
+            </div>
+            <div class="config-item">
+                <label>每天增加</label>
+                <input type="number" id="dailyAmount" min="0" step="0.1" placeholder="0.0">
+            </div>
+            <button class="save-btn" onclick="saveConfig()">保存设置</button>
+        </div>
+    </div>
+
+    <script>
+        // 获取记录
+        function getRecords() {
+            return JSON.parse(localStorage.getItem('records') || '[]');
+        }
+
+        // 保存记录
+        function saveRecords(records) {
+            localStorage.setItem('records', JSON.stringify(records));
+            updateBalance();
+            updateSummary();
+            displayRecords();
+        }
+
+        // 添加记录
+        function addRecord(type) {
+            const amount = parseFloat(document.getElementById('amount').value);
+            const remark = document.getElementById('remark').value.trim();
+
+            if (isNaN(amount) || amount <= 0) {
+                alert('请输入有效金额');
+                return;
+            }
+
+            if (!remark) {
+                alert('请输入备注');
+                return;
+            }
+
+            const records = getRecords();
+            const now = new Date();
+            records.unshift({
+                time: now.toISOString(),
+                type: type,
+                amount: amount,
+                remark: remark
+            });
+
+            saveRecords(records);
+
+            // 清空输入
+            document.getElementById('amount').value = '';
+            document.getElementById('remark').value = '';
+        }
+
+        // 更新余额
+        function updateBalance() {
+            const records = getRecords();
+            let balance = 0;
+            records.forEach(record => {
+                if (record.type === 'deposit') {
+                    balance += record.amount;
+                } else {
+                    balance -= record.amount;
+                }
+            });
+            localStorage.setItem('balance', balance);
+            document.getElementById('totalBalance').textContent = `¥${balance.toFixed(1)}`;
+        }
+
+        // 更新统计摘要
+        function updateSummary() {
+            const records = getRecords();
+            const now = new Date();
+            let weekSum = 0;
+            let monthSum = 0;
+            let yearSum = 0;
+
+            records.forEach(record => {
+                const recordDate = new Date(record.time);
+                const amount = record.type === 'deposit' ? record.amount : -record.amount;
+
+                // 本周
+                if (isSameWeek(now, recordDate)) {
+                    weekSum += amount;
+                }
+                // 本月
+                if (isSameMonth(now, recordDate)) {
+                    monthSum += amount;
+                }
+                // 本年
+                if (isSameYear(now, recordDate)) {
+                    yearSum += amount;
+                }
+            });
+
+            document.getElementById('weekSummary').textContent = `¥${weekSum.toFixed(1)}`;
+            document.getElementById('monthSummary').textContent = `¥${monthSum.toFixed(1)}`;
+            document.getElementById('yearSummary').textContent = `¥${yearSum.toFixed(1)}`;
+
+            // 添加颜色
+            ['weekSummary', 'monthSummary', 'yearSummary'].forEach(id => {
+                const element = document.getElementById(id);
+                const value = parseFloat(element.textContent.slice(1));
+                element.className = 'summary-item-value ' + (value >= 0 ? 'positive' : 'negative');
+            });
+        }
+
+        // 显示记录
+        function displayRecords() {
+            const records = getRecords();
+            const recordList = document.getElementById('recordList');
+            recordList.innerHTML = '';
+
+            records.forEach(record => {
+                const date = new Date(record.time);
+                const timeStr = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')} ${String(date.getHours()).padStart(2, '0')}:${String(date.getMinutes()).padStart(2, '0')}`;
+                
+                const div = document.createElement('div');
+                div.className = 'record-item';
+                div.innerHTML = `
+                    <div class="record-info">
+                        <div class="record-time">${timeStr}</div>
+                        <div class="record-remark">${record.remark}</div>
+                    </div>
+                    <div class="record-amount ${record.type === 'deposit' ? 'positive' : 'negative'}">
+                        ${record.type === 'deposit' ? '+' : '-'}¥${record.amount.toFixed(1)}
+                    </div>
+                `;
+                recordList.appendChild(div);
+            });
+        }
+
+        // 判断是否同一周
+        function isSameWeek(date1, date2) {
+            const d1 = new Date(date1);
+            const d2 = new Date(date2);
+            d1.setHours(0, 0, 0, 0);
+            d2.setHours(0, 0, 0, 0);
+            const diff = d1.getTime() - d2.getTime();
+            const oneDay = 86400000;
+            const day1 = d1.getDay() || 7;
+            const day2 = d2.getDay() || 7;
+            return Math.abs(diff - (day1 - day2) * oneDay) <= (6 * oneDay);
+        }
+
+        // 判断是否同一月
+        function isSameMonth(date1, date2) {
+            return date1.getFullYear() === date2.getFullYear() && 
+                   date1.getMonth() === date2.getMonth();
+        }
+
+        // 判断是否同一年
+        function isSameYear(date1, date2) {
+            return date1.getFullYear() === date2.getFullYear();
+        }
+
+        // 标题编辑功能
+        function editTitle() {
+            const title = document.getElementById('title');
+            const titleInput = document.getElementById('titleInput');
+            const editBtn = document.querySelector('.title-edit');
+            
+            title.style.display = 'none';
+            titleInput.style.display = 'block';
+            titleInput.value = title.textContent;
+            titleInput.focus();
+            
+            editBtn.textContent = '💾';
+            editBtn.onclick = saveTitle;
+        }
+
+        function saveTitle() {
+            const title = document.getElementById('title');
+            const titleInput = document.getElementById('titleInput');
+            const editBtn = document.querySelector('.title-edit');
+            
+            const newTitle = titleInput.value.trim() || '孩子小金库';
+            title.textContent = newTitle;
+            localStorage.setItem('appTitle', newTitle);
+            
+            title.style.display = 'block';
+            titleInput.style.display = 'none';
+            
+            editBtn.textContent = '✏️';
+            editBtn.onclick = editTitle;
+        }
+
+        // 切换标签页
+        function switchTab(tabName) {
+            document.querySelectorAll('.tab').forEach(tab => {
+                if (tab.textContent === (tabName === 'record' ? '记账' : '设置')) {
+                    tab.classList.add('active');
+                } else {
+                    tab.classList.remove('active');
+                }
+            });
+            
+            document.querySelectorAll('.content-section').forEach(section => {
+                section.classList.remove('active');
+            });
+            document.getElementById(tabName + 'Section').classList.add('active');
+            
+            if (tabName === 'config') {
+                loadConfig();
+            }
+        }
+
+        // 加载配置
+        function loadConfig() {
+            const config = JSON.parse(localStorage.getItem('autoIncreaseConfig') || '{"yearly":0,"monthly":0,"weekly":0,"daily":0}');
+            document.getElementById('yearlyAmount').value = config.yearly || '';
+            document.getElementById('monthlyAmount').value = config.monthly || '';
+            document.getElementById('weeklyAmount').value = config.weekly || '';
+            document.getElementById('dailyAmount').value = config.daily || '';
+        }
+
+        // 保存配置
+        function saveConfig() {
+            const config = {
+                yearly: parseFloat(document.getElementById('yearlyAmount').value) || 0,
+                monthly: parseFloat(document.getElementById('monthlyAmount').value) || 0,
+                weekly: parseFloat(document.getElementById('weeklyAmount').value) || 0,
+                daily: parseFloat(document.getElementById('dailyAmount').value) || 0
+            };
+            localStorage.setItem('autoIncreaseConfig', JSON.stringify(config));
+            alert('设置已保存');
+            switchTab('record');
+        }
+
+        // 检查自动增加
+        function checkAutoIncrease() {
+            const today = new Date();
+            const lastCheckDate = localStorage.getItem('lastCheckDate');
+            const lastCheck = lastCheckDate ? new Date(lastCheckDate) : new Date(0);
+            const config = JSON.parse(localStorage.getItem('autoIncreaseConfig') || '{"yearly":0,"monthly":0,"weekly":0,"daily":0}');
+            
+            if (today.getTime() - lastCheck.getTime() >= 24 * 60 * 60 * 1000) {
+                let increase = 0;
+                
+                if (today.getFullYear() !== lastCheck.getFullYear()) {
+                    increase += config.yearly;
+                }
+                
+                if (today.getMonth() !== lastCheck.getMonth()) {
+                    increase += config.monthly;
+                }
+                
+                if (Math.floor(today.getTime() / (7 * 24 * 60 * 60 * 1000)) !== 
+                    Math.floor(lastCheck.getTime() / (7 * 24 * 60 * 60 * 1000))) {
+                    increase += config.weekly;
+                }
+                
+                if (today.getDate() !== lastCheck.getDate()) {
+                    increase += config.daily;
+                }
+                
+                if (increase > 0) {
+                    const records = getRecords();
+                    records.unshift({
+                        time: today.toISOString(),
+                        type: 'deposit',
+                        amount: increase,
+                        remark: '自动增加'
+                    });
+                    saveRecords(records);
+                }
+                
+                localStorage.setItem('lastCheckDate', today.toISOString());
+            }
+        }
+
+        // 初始化
+        window.onload = function() {
+            const savedTitle = localStorage.getItem('appTitle');
+            if (savedTitle) {
+                document.getElementById('title').textContent = savedTitle;
+            }
+            updateBalance();
+            updateSummary();
+            displayRecords();
+            checkAutoIncrease();
+        };
+
+        // 每天检查一次自动增加
+        setInterval(checkAutoIncrease, 24 * 60 * 60 * 1000);
+    </script>
+</body>
+</html>

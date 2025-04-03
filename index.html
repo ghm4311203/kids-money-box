@@ -1,0 +1,385 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>孩子小金库</title>
+    <link rel="manifest" href="./manifest.json">
+    <meta name="theme-color" content="#1d1d1f">
+    <link rel="apple-touch-icon" href="./images/icons/manifest-icon-192.maskable.png">
+    <link href="https://fonts.googleapis.com/css2?family=Roboto+Mono:wght@500&family=Noto+Sans+SC:wght@400;500;600&display=swap" rel="stylesheet">
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+        body {
+            font-family: 'Noto Sans SC', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            width: 375px;
+            height: 812px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f5f5f7;
+            position: relative;
+            overflow-x: hidden;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        .title-container {
+            width: 100%;
+            text-align: center;
+            margin-bottom: 40px;
+        }
+        h1 {
+            font-size: 24px;
+            color: #1d1d1f;
+            font-weight: 600;
+        }
+        .balance-display {
+            width: 100%;
+            padding: 30px 20px;
+            background-color: #1d1d1f;
+            border-radius: 16px;
+            box-shadow: 0 4px 16px rgba(0,0,0,0.2);
+            margin-bottom: 30px;
+        }
+        .flip-clock {
+            display: flex;
+            justify-content: center;
+            gap: 4px;
+            font-family: 'Roboto Mono', monospace;
+            font-size: 48px;
+            color: white;
+        }
+        .digit {
+            position: relative;
+            width: 40px;
+            height: 60px;
+            background-color: #2c2c2e;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.3);
+        }
+        .digit::before {
+            content: '';
+            position: absolute;
+            left: 0;
+            right: 0;
+            height: 1px;
+            background-color: rgba(255,255,255,0.1);
+            top: 50%;
+        }
+        .separator {
+            font-size: 48px;
+            color: #ff2d55;
+            margin: 0 4px;
+            line-height: 60px;
+        }
+        .currency {
+            color: #ff2d55;
+            font-size: 24px;
+            margin-left: 8px;
+            line-height: 60px;
+        }
+        .qr-container {
+            width: 200px;
+            background-color: white;
+            padding: 20px;
+            border-radius: 16px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+            text-align: center;
+        }
+        .qr-box {
+            margin-bottom: 15px;
+        }
+        #qrCode {
+            width: 160px;
+            height: 160px;
+            border-radius: 8px;
+        }
+        .qr-text {
+            font-size: 14px;
+            color: #86868b;
+            margin-top: 10px;
+        }
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0,0,0,0.5);
+            z-index: 1000;
+        }
+        .modal-content {
+            background-color: white;
+            margin: 20% auto;
+            padding: 20px;
+            width: 90%;
+            max-width: 500px;
+            border-radius: 12px;
+            position: relative;
+        }
+        .config-item {
+            margin: 15px 0;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+        .config-item label {
+            font-size: 16px;
+            color: #1d1d1f;
+        }
+        .config-item input {
+            width: 100px;
+            padding: 8px;
+            border: 1px solid #d2d2d7;
+            border-radius: 8px;
+            font-size: 16px;
+            text-align: right;
+            background-color: #f5f5f7;
+        }
+        .close {
+            position: absolute;
+            top: 10px;
+            right: 15px;
+            cursor: pointer;
+            font-size: 24px;
+            color: #86868b;
+        }
+        .save-btn {
+            background-color: #0071e3;
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 8px;
+            cursor: pointer;
+            margin-top: 20px;
+            width: 100%;
+            font-size: 16px;
+            font-weight: 500;
+        }
+        .save-btn:active {
+            background-color: #0062c4;
+        }
+        @media (max-width: 375px) {
+            body {
+                width: 100%;
+                height: 100vh;
+            }
+            .balance-display {
+                padding: 20px 15px;
+            }
+            .flip-clock {
+                font-size: 40px;
+            }
+            .digit {
+                width: 34px;
+                height: 50px;
+            }
+            .separator, .currency {
+                font-size: 40px;
+                line-height: 50px;
+            }
+            .currency {
+                font-size: 20px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="title-container">
+        <h1 id="title">孩子小金库</h1>
+    </div>
+
+    <div class="balance-display">
+        <div class="flip-clock" id="balanceDisplay">
+            <!-- Digits will be inserted by JavaScript -->
+        </div>
+    </div>
+
+    <div class="qr-container">
+        <div class="qr-box">
+            <!-- 请使用这个网址生成二维码：https://ghm4311203.github.io/kids-money-box/luru.html -->
+            <img id="qrCode" src="images/qr.png?v=2" alt="扫码录入">
+        </div>
+        <div class="qr-text">扫码记账</div>
+    </div>
+
+    <div id="configModal" class="modal">
+        <div class="modal-content">
+            <span class="close" onclick="closeConfig()">&times;</span>
+            <h2>自动增加配置</h2>
+            <div class="config-item">
+                <label>每年增加：</label>
+                <input type="number" id="yearlyAmount" min="0" step="0.1">
+            </div>
+            <div class="config-item">
+                <label>每月增加：</label>
+                <input type="number" id="monthlyAmount" min="0" step="0.1">
+            </div>
+            <div class="config-item">
+                <label>每周增加：</label>
+                <input type="number" id="weeklyAmount" min="0" step="0.1">
+            </div>
+            <div class="config-item">
+                <label>每天增加：</label>
+                <input type="number" id="dailyAmount" min="0" step="0.1">
+            </div>
+            <button class="save-btn" onclick="saveConfig()">保存配置</button>
+        </div>
+    </div>
+
+    <script>
+        // 注册 Service Worker
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('./sw.js')
+                    .then(registration => {
+                        console.log('ServiceWorker registration successful');
+                    })
+                    .catch(err => {
+                        console.log('ServiceWorker registration failed: ', err);
+                    });
+            });
+        }
+
+        // 加载保存的标题
+        document.addEventListener('DOMContentLoaded', function() {
+            const savedTitle = localStorage.getItem('appTitle');
+            if (savedTitle) {
+                document.getElementById('title').textContent = savedTitle;
+            }
+            updateBalanceDisplay();
+        });
+
+        function updateBalanceDisplay() {
+            const balance = localStorage.getItem('balance') ? parseFloat(localStorage.getItem('balance')) : 0;
+            const balanceStr = balance.toFixed(1).toString();
+            const display = document.getElementById('balanceDisplay');
+            display.innerHTML = '';
+
+            // 创建翻页时钟样式的数字显示
+            for (let i = 0; i < balanceStr.length; i++) {
+                const char = balanceStr[i];
+                if (char === '.') {
+                    const separator = document.createElement('div');
+                    separator.className = 'separator';
+                    separator.textContent = '.';
+                    display.appendChild(separator);
+                } else {
+                    const digit = document.createElement('div');
+                    digit.className = 'digit';
+                    digit.textContent = char;
+                    display.appendChild(digit);
+                }
+            }
+
+            // 添加货币单位
+            const currency = document.createElement('div');
+            currency.className = 'currency';
+            currency.textContent = '元';
+            display.appendChild(currency);
+        }
+
+        // 每秒更新余额显示
+        setInterval(updateBalanceDisplay, 1000);
+
+        let currentBalance = localStorage.getItem('balance') ? parseFloat(localStorage.getItem('balance')) : 0;
+        let autoIncreaseConfig = JSON.parse(localStorage.getItem('autoIncreaseConfig') || '{"yearly":0,"monthly":0,"weekly":0,"daily":0}');
+
+        // 加载配置
+        function loadConfig() {
+            document.getElementById('yearlyAmount').value = autoIncreaseConfig.yearly;
+            document.getElementById('monthlyAmount').value = autoIncreaseConfig.monthly;
+            document.getElementById('weeklyAmount').value = autoIncreaseConfig.weekly;
+            document.getElementById('dailyAmount').value = autoIncreaseConfig.daily;
+        }
+
+        // 显示配置
+        function showConfig() {
+            document.getElementById('configModal').style.display = 'block';
+            loadConfig();
+        }
+
+        // 关闭配置
+        function closeConfig() {
+            document.getElementById('configModal').style.display = 'none';
+        }
+
+        // 保存配置
+        function saveConfig() {
+            autoIncreaseConfig = {
+                yearly: parseFloat(document.getElementById('yearlyAmount').value) || 0,
+                monthly: parseFloat(document.getElementById('monthlyAmount').value) || 0,
+                weekly: parseFloat(document.getElementById('weeklyAmount').value) || 0,
+                daily: parseFloat(document.getElementById('dailyAmount').value) || 0
+            };
+            localStorage.setItem('autoIncreaseConfig', JSON.stringify(autoIncreaseConfig));
+            closeConfig();
+        }
+
+        // 检查自动增加
+        function checkAutoIncrease() {
+            const today = new Date();
+            const lastCheckDate = localStorage.getItem('lastCheckDate');
+            const lastCheck = lastCheckDate ? new Date(lastCheckDate) : new Date(0);
+            
+            // 检查是否需要增加
+            if (today.getTime() - lastCheck.getTime() >= 24 * 60 * 60 * 1000) {
+                let increase = 0;
+                
+                // 检查年度增加
+                if (today.getFullYear() !== lastCheck.getFullYear()) {
+                    increase += autoIncreaseConfig.yearly;
+                }
+                
+                // 检查月度增加
+                if (today.getMonth() !== lastCheck.getMonth()) {
+                    increase += autoIncreaseConfig.monthly;
+                }
+                
+                // 检查周度增加
+                if (Math.floor(today.getTime() / (7 * 24 * 60 * 60 * 1000)) !== 
+                    Math.floor(lastCheck.getTime() / (7 * 24 * 60 * 60 * 1000))) {
+                    increase += autoIncreaseConfig.weekly;
+                }
+                
+                // 检查日度增加
+                if (today.getDate() !== lastCheck.getDate()) {
+                    increase += autoIncreaseConfig.daily;
+                }
+                
+                if (increase > 0) {
+                    currentBalance += increase;
+                    localStorage.setItem('balance', currentBalance);
+                    updateBalanceDisplay();
+                    
+                    // 记录自动增加
+                    const records = JSON.parse(localStorage.getItem('records') || '[]');
+                    const timeStr = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}-${String(today.getDate()).padStart(2, '0')} ${String(today.getHours()).padStart(2, '0')}:${String(today.getMinutes()).padStart(2, '0')}`;
+                    records.push({
+                        time: timeStr,
+                        type: 'deposit',
+                        amount: increase,
+                        remark: '自动增加'
+                    });
+                    localStorage.setItem('records', JSON.stringify(records));
+                }
+                
+                localStorage.setItem('lastCheckDate', today.toISOString());
+            }
+        }
+
+        // 检查自动增加
+        checkAutoIncrease();
+        // 每天检查一次
+        setInterval(checkAutoIncrease, 24 * 60 * 60 * 1000);
+    </script>
+</body>
+</html>
